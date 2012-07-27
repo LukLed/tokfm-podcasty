@@ -10,7 +10,7 @@ namespace TokFM.Business
 {
 	class PodcastService : IPodcastService
 	{
-		public IList<Podcast> GetLatestPodcasts(int pageNumber)
+		public IEnumerable<Podcast> GetLatestPodcasts(int pageNumber)
 		{
 			var hw = new HtmlWeb();
 			hw.OverrideEncoding = Encoding.GetEncoding("ISO-8859-2");

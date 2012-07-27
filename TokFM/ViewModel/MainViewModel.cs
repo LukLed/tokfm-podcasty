@@ -9,18 +9,6 @@ using TokFM.Model;
 
 namespace TokFM.ViewModel
 {
-	/// <summary>
-	/// This class contains properties that the main View can data bind to.
-	/// <para>
-	/// Use the <strong>mvvminpc</strong> snippet to add bindable properties to this ViewModel.
-	/// </para>
-	/// <para>
-	/// You can also use Blend to data bind with the tool's support.
-	/// </para>
-	/// <para>
-	/// See http://www.galasoft.ch/mvvm/getstarted
-	/// </para>
-	/// </summary>
 	public class MainViewModel : ViewModelBase
 	{
 		public RelayCommand<Podcast> PlayPodcastCommand { get; private set; }
@@ -31,6 +19,7 @@ namespace TokFM.ViewModel
 		private Podcast _currentPodcast;
 		private readonly DispatcherTimer _dispatcherTimer;
 		private bool _changingPosition;
+		private string _activePage;
 
 		public ObservableCollection<Podcast> Podcasts
 		{
@@ -39,6 +28,11 @@ namespace TokFM.ViewModel
 		}
 
 		public MediaPlayer MediaPlayer { get; set; }
+		public string ActivePage
+		{
+			get { return _activePage; }
+			set { _activePage = value; RaisePropertyChanged("ActivePage"); }
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the MainViewModel class.
@@ -109,8 +103,16 @@ namespace TokFM.ViewModel
 
 		private void LoadPodcasts(string page)
 		{
+			ActivePage = page;
+			if (Podcasts != null)
+				Podcasts.Clear();
+			System.Threading.ThreadPool.QueueUserWorkItem(CallBack, null);
+		}
+
+		private void CallBack(object state)
+		{
 			var service = new Business.PodcastService();
-			Podcasts = new ObservableCollection<Podcast>(service.GetLatestPodcasts(Convert.ToInt32(page)));
+			Podcasts = new ObservableCollection<Podcast>(service.GetLatestPodcasts(Convert.ToInt32(ActivePage)));
 		}
 
 		private void CurrentPodcastOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -123,12 +125,5 @@ namespace TokFM.ViewModel
 				}
 			}
 		}
-
-		////public override void Cleanup()
-		////{
-		////    // Clean up if needed
-
-		////    base.Cleanup();
-		////}
 	}
 }
